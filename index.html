@@ -110,6 +110,81 @@
     font-size: 0.88em;
   }
 
+  /* ── Path chooser ── */
+  .path-chooser {
+    margin: 2.5rem 0;
+    text-align: center;
+  }
+
+  .path-chooser p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.75rem;
+    border-radius: 6px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    text-decoration: none;
+  }
+
+  .btn-script {
+    background: var(--accent);
+    color: #000;
+  }
+
+  .btn-script:hover {
+    background: #00bfa0;
+  }
+
+  .btn-manual {
+    background: transparent;
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .btn-manual:hover {
+    background: rgba(240,165,0,0.1);
+  }
+
+  .btn-back {
+    background: transparent;
+    border-color: var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+    padding: 0.5rem 1.1rem;
+    margin-bottom: 2rem;
+    cursor: pointer;
+  }
+
+  .btn-back:hover {
+    border-color: var(--muted);
+    color: var(--text);
+  }
+
+  /* ── Panels ── */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
   .steps { counter-reset: step; }
 
   .step {
@@ -134,6 +209,10 @@
     justify-content: center;
     flex-shrink: 0;
     margin-top: 0.15rem;
+  }
+
+  .step-num.manual {
+    background: var(--accent2);
   }
 
   .step-body h3 {
@@ -216,6 +295,54 @@
     margin-bottom: 0.5rem;
   }
 
+  .repo-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 6px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .repo-box div h2 {
+    font-size: 0.8rem;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.25rem;
+  }
+
+  .repo-box div p {
+    font-size: 0.88rem;
+    color: var(--muted);
+  }
+
+  .btn-repo {
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    padding: 0.5rem 1.1rem;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn-repo:hover {
+    background: var(--accent);
+    color: #000;
+  }
+
   .divider {
     border: none;
     border-top: 1px solid var(--border);
@@ -233,6 +360,8 @@
 </head>
 <body>
 <div class="wrapper">
+
+  <!-- ── Always visible: header, symptom, root cause ── -->
 
   <header>
     <div class="tag">Linux Hardware Fix · Kubuntu / Ubuntu</div>
@@ -253,114 +382,160 @@
     <p>libinput is misidentifying the trackpad as a <strong>clickpad</strong> (a buttonless pad you physically depress). This causes it to ignore events from the separate physical buttons entirely. The fix is to add a libinput quirks file that tells it the correct hardware type.</p>
   </div>
 
-  <hr class="divider">
+  <!-- ── Path chooser (shown on landing) ── -->
+  <div class="path-chooser" id="chooser">
+    <p>How would you like to apply the fix?</p>
+    <div class="btn-row">
+      <button class="btn btn-script" onclick="showPanel('script')">
+        &#9654; Run the Script (Recommended)
+      </button>
+      <button class="btn btn-manual" onclick="showPanel('manual')">
+        &#9998; Manual Fix
+      </button>
+    </div>
+  </div>
 
-  <div class="steps">
+  <!-- ══════════════════════════════════════════
+       PANEL: SCRIPT
+  ══════════════════════════════════════════ -->
+  <div id="panel-script" class="panel">
 
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <h3>Verify the issue with libinput</h3>
-        <p>Confirm libinput is reporting the clickpad misdetection:</p>
-        <pre><code>libinput list-devices</code></pre>
-        <p>You should see the <span class="inline-code">kernel bug: missing right button, assuming it is a clickpad</span> message next to the ELAN0700 touchpad entry. Also confirm button events do reach the kernel (even though the OS ignores them):</p>
-        <pre><code>sudo apt install evtest
-sudo evtest</code></pre>
-        <p>Select the ELAN0700 device and press the physical buttons — you should see events logged, confirming it is a driver config issue, not a hardware failure.</p>
+    <button class="btn btn-back" onclick="showChooser()">&#8592; Back</button>
+
+    <div class="repo-box">
+      <div>
+        <h2>Download the Script</h2>
+        <p>Get the fix script and desktop launcher from GitHub</p>
       </div>
+      <a class="btn-repo" href="https://github.com/brantgoe/Getac-Touchpad-Fix-Linux" target="_blank">
+        &#8599; GitHub Repo
+      </a>
     </div>
 
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <h3>Create the libinput quirks directory</h3>
-        <p>The <span class="inline-code">/etc/libinput/</span> directory does not exist by default. Create it:</p>
-        <pre><code>sudo mkdir -p /etc/libinput</code></pre>
-      </div>
-    </div>
+    <div class="steps">
 
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <h3>Create the quirks override file</h3>
-        <pre><code>sudo nano /etc/libinput/local-overrides.quirks</code></pre>
-        <p>Paste in the following content exactly:</p>
-        <span class="file-label">/etc/libinput/local-overrides.quirks</span>
-        <pre><code>[Getac S410 Touchpad]
-MatchName=ELAN0700:00 093A:0274 Touchpad
-ModelTouchpadButtonAreas=1</code></pre>
-        <div class="nano-tip">
-          <strong>Saving in nano:</strong> Press <strong>Ctrl+O</strong> → Enter to confirm filename → <strong>Ctrl+X</strong> to exit.
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Download the files</h3>
+          <p>Clone or download the repository, then navigate to the folder in your file manager.</p>
+          <pre><code>git clone https://github.com/brantgoe/Getac-Touchpad-Fix-Linux.git</code></pre>
         </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <h3>Reboot</h3>
-        <pre><code>sudo reboot</code></pre>
-        <p>After rebooting, the physical left and right trackpad buttons should work normally.</p>
-      </div>
-    </div>
-
-    <div class="step">
-      <div class="step-num">5</div>
-      <div class="step-body">
-        <h3>Verify the fix</h3>
-        <p>Run <span class="inline-code">libinput list-devices</span> again and confirm the "clickpad" warning is gone for the ELAN0700 device.</p>
-      </div>
-    </div>
-
-  </div>
-
-  <div class="success-box">
-    <h2>Why this works</h2>
-    <p>The <span class="inline-code">ModelTouchpadButtonAreas=1</span> quirk tells libinput to treat the bottom edge of the trackpad as discrete left/right button zones, matching the physical hardware layout of the S410 G4. Without this, libinput's clickpad assumption swallows the button events before they reach the desktop.</p>
-  </div>
-
-  <hr class="divider">
-
-  <div class="root-cause" style="border-left-color: var(--accent);">
-    <h2 style="color: var(--accent);">Automated Script</h2>
-    <p>A bash script and desktop launcher are included in this project to apply the fix without manually opening a terminal.</p>
-  </div>
-
-  <div class="steps">
-
-    <div class="step">
-      <div class="step-num">A</div>
-      <div class="step-body">
-        <h3>Option 1 — Double-click launcher (no terminal needed)</h3>
-        <p>In your file manager, navigate to the project folder and double-click:</p>
-        <pre><code>Getac-Touchpad-Fix.desktop</code></pre>
-        <p>If prompted, choose <strong>Run</strong>. A terminal window will open automatically, run the fix, and wait for you to press Enter before closing.</p>
-        <div class="nano-tip">
-          <strong>If it won't run:</strong> Right-click the file → <strong>Properties</strong> → tick <strong>Allow executing file as program</strong>, then try again.
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Option A — Double-click launcher (no terminal needed)</h3>
+          <p>In your file manager, double-click:</p>
+          <pre><code>Getac-Touchpad-Fix.desktop</code></pre>
+          <p>If prompted, choose <strong>Run</strong>. A terminal window will open automatically, run the fix, and wait for you to press Enter before closing.</p>
+          <div class="nano-tip">
+            <strong>If it won't run:</strong> Right-click the file → <strong>Properties</strong> → tick <strong>Allow executing file as program</strong>, then try again.
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">B</div>
-      <div class="step-body">
-        <h3>Option 2 — Run from terminal</h3>
-        <p>If you prefer to run it manually from a terminal:</p>
-        <pre><code>bash /A_Dev/Getac_Touchpad_Fix_Linux/fix_touchpad.sh</code></pre>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Option B — Run from terminal</h3>
+          <p>If you prefer to invoke it directly:</p>
+          <pre><code>bash /path/to/Getac-Touchpad-Fix-Linux/fix_touchpad.sh</code></pre>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">C</div>
-      <div class="step-body">
-        <h3>What the script does</h3>
-        <p>The script automates all manual steps above:</p>
-        <pre><code>1. Checks libinput is installed (installs it if missing)
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>What the script does</h3>
+          <p>The script automates all manual steps in one go:</p>
+          <pre><code>1. Checks libinput is installed (installs it if missing)
 2. Detects whether the clickpad misdetection is present
 3. Creates /etc/libinput/ and writes local-overrides.quirks
    (backs up any existing file first)
 4. Prompts you to reboot — or skip and reboot manually later</code></pre>
+        </div>
       </div>
+
+    </div>
+
+    <div class="success-box">
+      <h2>Why this works</h2>
+      <p>The <span class="inline-code">ModelTouchpadButtonAreas=1</span> quirk tells libinput to treat the bottom edge of the trackpad as discrete left/right button zones, matching the physical hardware layout of the S410 G4. Without this, libinput's clickpad assumption swallows the button events before they reach the desktop.</p>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       PANEL: MANUAL
+  ══════════════════════════════════════════ -->
+  <div id="panel-manual" class="panel">
+
+    <button class="btn btn-back" onclick="showChooser()">&#8592; Back</button>
+
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num manual">1</div>
+        <div class="step-body">
+          <h3>Verify the issue with libinput</h3>
+          <p>Confirm libinput is reporting the clickpad misdetection:</p>
+          <pre><code>libinput list-devices</code></pre>
+          <p>You should see the <span class="inline-code">kernel bug: missing right button, assuming it is a clickpad</span> message next to the ELAN0700 touchpad entry. Also confirm button events do reach the kernel (even though the OS ignores them):</p>
+          <pre><code>sudo apt install evtest
+sudo evtest</code></pre>
+          <p>Select the ELAN0700 device and press the physical buttons — you should see events logged, confirming it is a driver config issue, not a hardware failure.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num manual">2</div>
+        <div class="step-body">
+          <h3>Create the libinput quirks directory</h3>
+          <p>The <span class="inline-code">/etc/libinput/</span> directory does not exist by default. Create it:</p>
+          <pre><code>sudo mkdir -p /etc/libinput</code></pre>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num manual">3</div>
+        <div class="step-body">
+          <h3>Create the quirks override file</h3>
+          <pre><code>sudo nano /etc/libinput/local-overrides.quirks</code></pre>
+          <p>Paste in the following content exactly:</p>
+          <span class="file-label">/etc/libinput/local-overrides.quirks</span>
+          <pre><code>[Getac S410 Touchpad]
+MatchName=ELAN0700:00 093A:0274 Touchpad
+ModelTouchpadButtonAreas=1</code></pre>
+          <div class="nano-tip">
+            <strong>Saving in nano:</strong> Press <strong>Ctrl+O</strong> → Enter to confirm filename → <strong>Ctrl+X</strong> to exit.
+          </div>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num manual">4</div>
+        <div class="step-body">
+          <h3>Reboot</h3>
+          <pre><code>sudo reboot</code></pre>
+          <p>After rebooting, the physical left and right trackpad buttons should work normally.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num manual">5</div>
+        <div class="step-body">
+          <h3>Verify the fix</h3>
+          <p>Run <span class="inline-code">libinput list-devices</span> again and confirm the "clickpad" warning is gone for the ELAN0700 device.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="success-box">
+      <h2>Why this works</h2>
+      <p>The <span class="inline-code">ModelTouchpadButtonAreas=1</span> quirk tells libinput to treat the bottom edge of the trackpad as discrete left/right button zones, matching the physical hardware layout of the S410 G4. Without this, libinput's clickpad assumption swallows the button events before they reach the desktop.</p>
     </div>
 
   </div>
@@ -370,5 +545,23 @@ ModelTouchpadButtonAreas=1</code></pre>
   </footer>
 
 </div>
+
+<script>
+  function showPanel(name) {
+    document.getElementById('chooser').style.display = 'none';
+    document.getElementById('panel-script').classList.remove('active');
+    document.getElementById('panel-manual').classList.remove('active');
+    document.getElementById('panel-' + name).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showChooser() {
+    document.getElementById('panel-script').classList.remove('active');
+    document.getElementById('panel-manual').classList.remove('active');
+    document.getElementById('chooser').style.display = '';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
 </body>
 </html>
