@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Getac Touchpad Fix
+Comment=Fix physical trackpad buttons on Getac S410 G4 (ELAN0700)
+Exec=bash -c 'bash /A_Dev/Getac_Touchpad_Fix_Linux/fix_touchpad.sh; read -rp "Press Enter to close..."'
+Terminal=true
+Icon=input-touchpad
+Categories=System;
+StartupNotify=false
